@@ -2,3 +2,5 @@
 
 .env
 .venv/
+
+config.yaml

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Used for Docker
+
 if [[ -f "/config/config.yml" ]]; then
     echo "$FILE exists." ;
     exec /app/webhookntfy ;
