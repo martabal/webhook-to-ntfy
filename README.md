@@ -3,9 +3,9 @@
 [![Publish Release](https://github.com/martabal/webhook-to-ntfy/actions/workflows/push_docker.yml/badge.svg)](https://github.com/martabal/webhook-to-ntfy/actions/workflows/push_docker.yml)
 [![Build](https://github.com/martabal/webhook-to-ntfy/actions/workflows/build.yml/badge.svg)](https://github.com/martabal/webhook-to-ntfy/actions/workflows/build.yml)
 
-## How to use it
+## What is it
 
-Edit config.yaml to use the services you want. Then rename it config.yaml.
+Use [ntfy](https://github.com/binwiederhier/ntfy) to services that don't support ntfy, but support webhook notifications.
 
 Services available :
 
