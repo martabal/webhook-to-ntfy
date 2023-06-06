@@ -30,12 +30,10 @@ pub struct New {
     pub userinfoo : Userinfos,
 }
 
-
-
-
-
-
-
-
-
-
+#[derive(Debug, Serialize, Deserialize,Clone)]
+pub struct Action {
+pub action: String,
+pub label: String,
+pub url: String,
+pub clear: bool
+}

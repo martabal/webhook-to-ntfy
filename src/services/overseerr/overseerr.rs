@@ -10,7 +10,7 @@ pub async fn myoverseerr(Extension(myuser): Extension<Arc<New>>, Json(payload): 
     let message : String = myuser.servicee.message.to_owned().unwrap_or(payload.message);
 
 
-    webhookntfy::ntfy::ntfy(axum::extract::State(myuser.userinfoo.to_owned().into()), title, message, myuser.servicee.to_owned()).await;
+    webhookntfy::ntfy::ntfy(axum::extract::State(myuser.userinfoo.to_owned().into()), title, message, myuser.servicee.to_owned(), None).await;
 
     
     StatusCode::OK

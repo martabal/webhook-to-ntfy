@@ -2,11 +2,12 @@
 use std::{sync::Arc};
 use axum::extract::State;
 use reqwest;
-use crate::{userinfo::{Userinfos}, models::Config};
+use crate::{userinfo::{Userinfos}, models::{Config}};
 
-pub async fn ntfy(State(myuser): State<Arc<Userinfos>>, title : String, message : String, myconfig : Config)  {
-    let url = format!("{}/{}", &myuser.ntfybaseurl,myconfig.topic);
+pub async fn ntfy(State(myuser): State<Arc<Userinfos>>, title : String, message : String, myconfig : Config, action : Option<String>)  {
+    let url = format!("{}{}", &myuser.ntfybaseurl,myconfig.topic);
     let client = reqwest::Client::new();
+
 
     let mypriority = getpriority(myconfig.priority);
     let mut resp = client
@@ -14,11 +15,20 @@ pub async fn ntfy(State(myuser): State<Arc<Userinfos>>, title : String, message 
     .basic_auth(&myuser.username, Some(&myuser.password))
     .header("Title", title)
     .header("Priority",mypriority)
+    
     .body(message);
 
     match &myconfig.icon{
         Some(x) =>{
             resp = resp.header("Tags", x);
+        }
+        None => {
+            
+        }
+    }
+    match action{
+        Some(x) =>{
+            resp = resp.header("Actions",x)
         }
         None => {
             
@@ -32,8 +42,8 @@ pub async fn ntfy(State(myuser): State<Arc<Userinfos>>, title : String, message 
 }
 
 
-fn getpriority(mytest : Option<i32>) -> String{
-    match mytest{
+fn getpriority(priority : Option<i32>) -> String{
+    match priority{
         Some(x) =>{
             return x.to_string();
         }
