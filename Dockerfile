@@ -6,6 +6,7 @@ COPY Cargo.toml Cargo.lock ./
 COPY src /app/src
 
 RUN apk add \
+    openssl-dev \
     musl-dev && \
     cargo build --release
 
