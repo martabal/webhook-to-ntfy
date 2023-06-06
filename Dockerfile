@@ -1,9 +1,12 @@
 FROM rust:1.70-alpine3.18 as builder
 
 WORKDIR /app/
+
+ENV RUSTFLAGS="-C target-feature=-crt-static"
+
 COPY Cargo.toml Cargo.lock ./
 COPY src /app/src
-RUN ls
+
 RUN apk add \
     libressl-dev \
     musl-dev && \
