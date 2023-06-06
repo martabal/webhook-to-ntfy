@@ -1,4 +1,4 @@
-FROM rust:1-alpine3.18 as builder
+FROM rust:1.70-alpine3.18 as builder
 
 WORKDIR /app/
 COPY Cargo.toml Cargo.lock ./
