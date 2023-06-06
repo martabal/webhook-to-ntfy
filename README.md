@@ -1,6 +1,7 @@
 # rust-ntfy
 
 [![Publish Release](https://github.com/martabal/webhook-to-ntfy/actions/workflows/push_docker.yml/badge.svg)](https://github.com/martabal/webhook-to-ntfy/actions/workflows/push_docker.yml)
+[![Build](https://github.com/martabal/webhook-to-ntfy/actions/workflows/build.yml/badge.svg)](https://github.com/martabal/webhook-to-ntfy/actions/workflows/build.yml)
 
 ## How to use it
 
