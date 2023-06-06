@@ -5,7 +5,7 @@
 
 ## How to use it
 
-Edit config.yaml to use the services you want. Then rename it config.yaml. 
+Edit config.yaml to use the services you want. Then rename it config.yaml.
 
 Services available :
 
@@ -19,10 +19,11 @@ Services available :
 
 ```sh
 docker run --name=webhook-to-ntfy \
-    -e QBITTORRENT_URL=http://192.168.1.10:8080 \
-    -e QBITTORRENT_PASSWORD='<your_password>' \
-    -e QBITTORRENT_USERNAME=admin \
-    -p 8090:8090 \
+    -e NTFY_BASE_URL=http://192.168.1.10:8080 \
+    -e NTFY_USERNAME=admin \
+    -e NTFY_PASSWORD='<your_password>' \
+    -e PORT=3000 `#optional` \
+    -p 3000:3000 \
     martabal/webhook-to-ntfy
 ```
 
@@ -32,12 +33,17 @@ docker run --name=webhook-to-ntfy \
 version: "2.1"
 services:
   immich:
-    image: martabal/qbittorrent-exporter:latest
-    container_name: qbittorrent-exporter
+    image: martabal/webhook-to-ntfy:latest
+    container_name: webhook-to-ntfy
     environment:
-        - ~/webhook-to-ntfy/config.yaml:/config/config.yaml
+      - NTFY_BASE_URL=http://192.168.1.10:8080
+      - NTFY_USERNAME=admin
+      - NTFY_PASSWORD='<your_password>'
+      - PORT=3000 #optional
+    volumes:
+      - ~/webhook-to-ntfy:/config
     ports:
-      - 8090:8090
+      - 3000:3000
     restart: unless-stopped
 ```
 

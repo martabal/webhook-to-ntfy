@@ -34,6 +34,13 @@ jobs:
           username: martabal
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_TOKEN }}
+
       - name: Build and push immich
         uses: docker/build-push-action@v3.2.0
         with:
@@ -44,4 +51,6 @@ jobs:
           tags: |
             martabal/webhook-to-ntfy:${{ inputs.tags }}
             martabal/webhook-to-ntfy:latest
+            ghcr.io/${{ github.repository_owner }}/webhook-to-ntfy:${{ inputs.tags }} 
+            ghcr.io/${{ github.repository_owner }}/webhook-to-ntfy:latest
 
