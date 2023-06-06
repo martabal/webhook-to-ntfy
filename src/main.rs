@@ -86,7 +86,6 @@ fn init() -> webhookntfy::userinfo::Userinfos {
         dotenv().ok();
         println!("Using .env file");
         myuser.ntfybaseurl=std::env::var("NTFY_BASE_URL").expect("NTFY_BASE_URL must be set.");
-        myuser.topic=std::env::var("NTFY_TOPIC").expect("NTFY_TOPIC must be set.");
         myuser.username=std::env::var("NTFY_USERNAME").expect("NTFY_USERNAME must be set.");
         myuser.password=std::env::var("NTFY_PASSWORD").expect("NTFY_PASSWORD must be set.");        
     }
@@ -94,10 +93,6 @@ fn init() -> webhookntfy::userinfo::Userinfos {
         println!("Using environment variables");
         match env::var("NTFY_BASE_URL") {
             Ok(val) => myuser.ntfybaseurl=val,
-            Err(_) => panic!("NTFY_BASE_URL must be set."),
-        }
-        match env::var("NTFY_TOPIC") {
-            Ok(val) => myuser.topic=val,
             Err(_) => panic!("NTFY_BASE_URL must be set."),
         }
         match env::var("NTFY_USERNAME") {

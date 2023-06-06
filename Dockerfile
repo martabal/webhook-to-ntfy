@@ -1,4 +1,4 @@
-FROM rust:1-alpine3.17 as builder
+FROM rust:1-alpine3.18 as builder
 
 WORKDIR /app/
 COPY Cargo.toml Cargo.lock ./
@@ -9,13 +9,13 @@ RUN apk add \
     musl-dev && \
     cargo build --release
 
-FROM alpine:3.17
+FROM alpine:3.18
 
 WORKDIR /app
-COPY --from=builder /app/target/release/webhookntfy /app/
-RUN apk add s6-overlay
 
+COPY --from=builder /app/target/release/webhookntfy /app/
 COPY init.sh config.example.yaml /app/
+
 ENV MODE=DOCKER
 CMD ["/app/init.sh"]
 
