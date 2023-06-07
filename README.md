@@ -1,11 +1,12 @@
-# rust-ntfy
+# Webhook to ntfy
 
 [![Publish Release](https://github.com/martabal/webhook-to-ntfy/actions/workflows/push_docker.yml/badge.svg)](https://github.com/martabal/webhook-to-ntfy/actions/workflows/push_docker.yml)
 [![Build](https://github.com/martabal/webhook-to-ntfy/actions/workflows/build.yml/badge.svg)](https://github.com/martabal/webhook-to-ntfy/actions/workflows/build.yml)
+[![Test](https://github.com/martabal/webhook-to-ntfy/actions/workflows/test.yml/badge.svg)](https://github.com/martabal/webhook-to-ntfy/actions/workflows/test.yml)
 
 ## What is it
 
-Use [ntfy](https://github.com/binwiederhier/ntfy) to services that don't support ntfy, but support webhook notifications.
+Use Webhook to ntfy to services that don't support [ntfy](https://github.com/binwiederhier/ntfy), but support webhook notifications.
 
 Services available :
 
