@@ -9,10 +9,18 @@ pub struct Servicesconfig{
 
 }
 #[derive(Debug, Serialize, Deserialize,Clone)]
+pub struct User {
+
+    pub username : String,
+    pub password : String
+}
+
+#[derive(Debug, Serialize, Deserialize,Clone)]
 pub struct Services {
 
     pub name : String,
-    pub config : Config
+    pub config : Config,
+    pub auth: Option<User>
     
 }
 #[derive(Debug, Serialize, Deserialize,Clone)]

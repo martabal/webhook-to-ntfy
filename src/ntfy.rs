@@ -5,7 +5,7 @@ use reqwest;
 use crate::{userinfo::{Userinfos}, models::{Config}};
 
 pub async fn ntfy(State(myuser): State<Arc<Userinfos>>, title : String, message : String, myconfig : Config, action : Option<String>)  {
-    let url = format!("{}{}", &myuser.ntfybaseurl,myconfig.topic);
+    let url = format!("{}/{}", &myuser.ntfybaseurl,myconfig.topic);
     let client = reqwest::Client::new();
 
 

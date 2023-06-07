@@ -1,21 +1,31 @@
 services:
 
   - name: "grafana" 
+    auth:
+      username: "username"
+      password: "password"
     config:
         icon: "desktop_computer" #Optional
         topic: "server"
         priority: 3 #Optional
 
   - name: "gitea"
+    auth:
+      username: "username"
+      password: "password"
     config: 
       icon: "desktop_computer" #Optional
       topic: "server" #Optional
       priority: 3 #Optional
     
   - name: "overseerr"
+    auth:
+      username: "username"
+      password: "password"
     config: 
       icon: "desktop_computer" #Optional
       topic: "server"
       message: "Message" #Optional
       title: "Title" #Optional
       priority: 3 #Optional
+  
