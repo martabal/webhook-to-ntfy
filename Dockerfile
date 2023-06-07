@@ -1,9 +1,6 @@
 FROM rust:1.70-alpine3.18 as builder
 
-WORKDIR /app/
-
-COPY Cargo.toml Cargo.lock ./
-COPY src /app/src
+COPY src Cargo.toml Cargo.lock /app/
 
 RUN apk add \
     openssl-dev \
@@ -17,8 +14,4 @@ WORKDIR /app
 COPY --from=builder /app/target/release/webhookntfy /app/
 COPY init.sh config.example.yaml /app/
 
-ENV MODE=DOCKER
 CMD ["/app/init.sh"]
-
-
-
