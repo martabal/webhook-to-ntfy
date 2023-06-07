@@ -1,6 +1,6 @@
 use axum::{
     routing::{get, post},
-    Extension, Router, 
+    Extension, Router,
 };
 use dotenv::dotenv;
 use serde_json::{json, Value};
@@ -9,7 +9,7 @@ use services::{gitea, grafana, overseerr};
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
 use webhookntfy::{
-    models::{New, Servicesconfig, },
+    models::{New, Servicesconfig},
     userinfo::Userinfos,
 };
 
@@ -20,58 +20,61 @@ async fn main() {
     let myinit = init();
 
     let scrape_config: Servicesconfig = inityml();
-    println!("{:?}",scrape_config);
+    println!("{:?}", scrape_config);
 
     let mut routes: Router = Router::new().route("/healthcheck", get(healthcheck));
 
     for service in scrape_config.services.iter() {
         if service.name.to_lowercase() == "gitea" {
             println!("Gitea activated");
-            routes = routes
-                .route("/gitea", post(gitea::gitea::mygitea));
+            routes = routes.route("/gitea", post(gitea::gitea::mygitea));
 
-                if let Some(test) = service.auth.clone() {
-                    println!("Authentication activated for Grafana");
-                    routes = routes
-                        .layer(axum::middleware::from_fn_with_state(test, webhookntfy::auth::auth));
-                }
+            if let Some(test) = service.auth.clone() {
+                println!("Authentication activated for Grafana");
+                routes = routes.layer(axum::middleware::from_fn_with_state(
+                    test,
+                    webhookntfy::auth::auth,
+                ));
+            }
 
-                routes = routes.layer(Extension(Arc::new(New {
-                    servicee: service.config.to_owned(),
-                    userinfoo: myinit.to_owned(),
-                })));
+            routes = routes.layer(Extension(Arc::new(New {
+                servicee: service.config.to_owned(),
+                userinfoo: myinit.to_owned(),
+            })));
         }
         if service.name.to_lowercase() == "grafana" {
             println!("Grafana activated");
-                        routes = routes
-                .route("/grafana", post(grafana::grafana::mygrafana));
+            routes = routes.route("/grafana", post(grafana::grafana::mygrafana));
 
-                if let Some(test) = service.auth.clone() {
-                    println!("Authentication activated for Grafana");
-                    routes = routes
-                        .layer(axum::middleware::from_fn_with_state(test, webhookntfy::auth::auth));
-                }
+            if let Some(test) = service.auth.clone() {
+                println!("Authentication activated for Grafana");
+                routes = routes.layer(axum::middleware::from_fn_with_state(
+                    test,
+                    webhookntfy::auth::auth,
+                ));
+            }
 
-                routes = routes.layer(Extension(Arc::new(New {
-                    servicee: service.config.to_owned(),
-                    userinfoo: myinit.to_owned(),
-                })));
+            routes = routes.layer(Extension(Arc::new(New {
+                servicee: service.config.to_owned(),
+                userinfoo: myinit.to_owned(),
+            })));
         }
         if service.name.to_lowercase() == "overseerr" {
             println!("Overseerr activated");
-            routes = routes
-                .route("/overseerr", post(overseerr::overseerr::myoverseerr));
+            routes = routes.route("/overseerr", post(overseerr::overseerr::myoverseerr));
 
-                if let Some(test) = service.auth.clone() {
-                    println!("Authentication activated for Overseerr");
-                    routes = routes
-                        .layer(axum::middleware::from_fn_with_state(test, webhookntfy::auth::auth));
-                }
+            if let Some(test) = service.auth.clone() {
+                println!("Authentication activated for Overseerr");
+                routes = routes.layer(axum::middleware::from_fn_with_state(
+                    test,
+                    webhookntfy::auth::auth,
+                ));
+            }
 
-                routes = routes.layer(Extension(Arc::new(New {
-                    servicee: service.config.to_owned(),
-                    userinfoo: myinit.to_owned(),
-                })));
+            routes = routes.layer(Extension(Arc::new(New {
+                servicee: service.config.to_owned(),
+                userinfoo: myinit.to_owned(),
+            })));
         }
     }
 
@@ -107,8 +110,6 @@ fn inityml() -> Servicesconfig {
         }
     }
 }
-
-
 
 fn init() -> webhookntfy::userinfo::Userinfos {
     let args: Vec<String> = env::args().collect();

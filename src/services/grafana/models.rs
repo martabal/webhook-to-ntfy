@@ -44,7 +44,6 @@ pub struct Alert {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Labels {
-
     pub instance: Option<String>,
     pub alertname: String,
     #[serde(rename = "grafana_folder")]

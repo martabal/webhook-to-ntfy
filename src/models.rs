@@ -1,29 +1,24 @@
-
 use serde::{Deserialize, Serialize};
 
 use crate::userinfo::Userinfos;
 
-#[derive(Debug, Serialize, Deserialize,Clone)]
-pub struct Servicesconfig{
-    pub services : Vec<Services>,
-
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Servicesconfig {
+    pub services: Vec<Services>,
 }
-#[derive(Debug, Serialize, Deserialize,Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
-
-    pub username : String,
-    pub password : String
+    pub username: String,
+    pub password: String,
 }
 
-#[derive(Debug, Serialize, Deserialize,Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Services {
-
-    pub name : String,
-    pub config : Config,
-    pub auth: Option<User>
-    
+    pub name: String,
+    pub config: Config,
+    pub auth: Option<User>,
 }
-#[derive(Debug, Serialize, Deserialize,Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
     pub icon: Option<String>,
     pub priority: Option<i32>,
@@ -34,14 +29,14 @@ pub struct Config {
 }
 
 pub struct New {
-    pub servicee : Config,
-    pub userinfoo : Userinfos,
+    pub servicee: Config,
+    pub userinfoo: Userinfos,
 }
 
-#[derive(Debug, Serialize, Deserialize,Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Action {
-pub action: String,
-pub label: String,
-pub url: String,
-pub clear: bool
+    pub action: String,
+    pub label: String,
+    pub url: String,
+    pub clear: bool,
 }

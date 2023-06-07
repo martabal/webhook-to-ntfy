@@ -1,4 +1,4 @@
-#[derive(Debug, Default,Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct Userinfos {
     pub ntfybaseurl: String,
     pub username: String,
@@ -8,7 +8,6 @@ pub struct Userinfos {
 
 #[allow(non_camel_case_types)]
 pub enum Priority {
-    
     urgent,
     high,
     default,
