@@ -8,10 +8,7 @@ use serde_yaml;
 use services::{gitea, grafana, overseerr};
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
-use webhookntfy::{
-    models::{New, Servicesconfig},
-    userinfo::Userinfos,
-};
+use webhookntfy::models::{New, Servicesconfig, Userinfos};
 
 mod services;
 
@@ -20,7 +17,6 @@ async fn main() {
     let myinit = init();
 
     let scrape_config: Servicesconfig = inityml();
-    println!("{:?}", scrape_config);
 
     let mut routes: Router = Router::new().route("/healthcheck", get(healthcheck));
 
@@ -38,8 +34,8 @@ async fn main() {
             }
 
             routes = routes.layer(Extension(Arc::new(New {
-                servicee: service.config.to_owned(),
-                userinfoo: myinit.to_owned(),
+                service: service.config.to_owned(),
+                user: myinit.to_owned(),
             })));
         }
         if service.name.to_lowercase() == "grafana" {
@@ -55,8 +51,8 @@ async fn main() {
             }
 
             routes = routes.layer(Extension(Arc::new(New {
-                servicee: service.config.to_owned(),
-                userinfoo: myinit.to_owned(),
+                service: service.config.to_owned(),
+                user: myinit.to_owned(),
             })));
         }
         if service.name.to_lowercase() == "overseerr" {
@@ -72,8 +68,8 @@ async fn main() {
             }
 
             routes = routes.layer(Extension(Arc::new(New {
-                servicee: service.config.to_owned(),
-                userinfoo: myinit.to_owned(),
+                service: service.config.to_owned(),
+                user: myinit.to_owned(),
             })));
         }
     }
@@ -95,25 +91,20 @@ async fn healthcheck() -> axum::extract::Json<Value> {
 }
 
 fn inityml() -> Servicesconfig {
-    match env::var("MODE") {
-        Ok(_) => {
-            let f = std::fs::File::open("/config/config.yaml").expect("Could not open file.");
-            let scrape_config: Servicesconfig =
-                serde_yaml::from_reader(f).expect("Could not read values.");
-            return scrape_config;
-        }
-        Err(_) => {
-            let f = std::fs::File::open("config.yaml").expect("Could not open file.");
-            let scrape_config: Servicesconfig =
-                serde_yaml::from_reader(f).expect("Could not read values.");
-            return scrape_config;
-        }
-    }
+    let path = if std::path::Path::new("config.yaml").exists() {
+        "config.yaml"
+    } else {
+        "/config/config.yaml"
+    };
+
+    let content = std::fs::read_to_string(path)
+        .unwrap_or_else(|err| panic!("Failed to read {}: {}", path, err));
+
+    serde_yaml::from_str(&content).unwrap_or_else(|err| panic!("Failed to parse {}: {}", path, err))
 }
 
-fn init() -> webhookntfy::userinfo::Userinfos {
+fn init() -> webhookntfy::models::Userinfos {
     let args: Vec<String> = env::args().collect();
-    let mut myuser = Userinfos::default();
     if args.iter().any(|i| i == "-e") {
         dotenv().ok();
         println!("Using .env file");
@@ -121,31 +112,34 @@ fn init() -> webhookntfy::userinfo::Userinfos {
         println!("Using environment variables");
     }
 
-    match env::var("NTFY_BASE_URL") {
-        Ok(val) => myuser.ntfybaseurl = val,
-        Err(_) => panic!("NTFY_BASE_URL must be set."),
-    }
-    match env::var("NTFY_USERNAME") {
-        Ok(val) => myuser.username = val,
-        Err(_) => panic!("NTFY_BASE_URL must be set."),
-    }
-    match env::var("NTFY_PASSWORD") {
-        Ok(val) => myuser.password = val,
-        Err(_) => panic!("NTFY_BASE_URL must be set."),
-    }
+    let user = Userinfos {
+        ntfybaseurl: env::var("NTFY_BASE_URL")
+            .unwrap_or_else(|_| panic!("NTFY_BASE_URL must be set.")),
+        username: env::var("NTFY_USERNAME")
+            .unwrap_or_else(|_| panic!("NTFY_USERNAME must be set.")),
+        password: env::var("NTFY_PASSWORD")
+            .unwrap_or_else(|_| panic!("NTFY_PASSWORD must be set.")),
+    };
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
     const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
-    println!("Author : {}", AUTHOR);
-    println!("webhookntfy version : {}", VERSION);
-    println!("Ntfy base URL : {}", myuser.ntfybaseurl);
-    println!("Username : {}", myuser.username);
-    println!("Password : {}", maskpassword(myuser.password.to_owned()));
-    println!("Started");
-    return myuser;
+    println!(
+        "Author: {}\n\
+        webhookntfy version: {}\n\
+        Ntfy base URL: {}\n\
+        Username: {}\n\
+        Password: {}\n\
+        Started",
+        AUTHOR,
+        VERSION,
+        user.ntfybaseurl,
+        user.username,
+        maskpassword(&user.password)
+    );
+    return user;
 }
 
-fn maskpassword(t: String) -> String {
+fn maskpassword(t: &str) -> String {
     let mut mask = String::new();
     for _ in t.chars() {
         mask.push('*');

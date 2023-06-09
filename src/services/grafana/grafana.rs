@@ -5,35 +5,45 @@ use std::sync::Arc;
 use webhookntfy::models::New;
 
 pub async fn mygrafana(
-    Extension(myuser): Extension<Arc<New>>,
+    Extension(config): Extension<Arc<New>>,
     Json(payload): Json<GrafanaWebhook>,
 ) -> impl IntoResponse {
     println!("test");
     for i in payload.alerts {
-        let title: String = myuser
-            .servicee
+        let title: String = config
+            .service
             .title
             .to_owned()
             .unwrap_or(i.labels.alertname);
-        let message: String = match &myuser.servicee.message {
-            Some(msg) => msg.to_owned(),
-            None => match &i.annotations.summary {
-                Some(summary) => summary.to_owned(),
-                None => String::new(), // Provide a default value here if needed
-            },
+        let message = config.service.message.clone().unwrap_or_else(|| {
+            i.annotations
+                .summary
+                .clone()
+                .unwrap_or_else(|| String::from("alert"))
+        });
+
+        let action = if let Some(action) = config.service.button {
+            if action {
+                Some(format!(
+                    "{}{}{}{}",
+                    "view, Silence, ",
+                    i.silence_url,
+                    ", clear=false; view, See details, ",
+                    i.panel_url
+                ))
+            } else {
+                None
+            }
+        } else {
+            None
         };
 
-        let action: String = format!(
-            "{}{}{}{}",
-            "view, Silence, ", i.silence_url, ", clear=false; view, See details, ", i.panel_url
-        );
-
         webhookntfy::ntfy::ntfy(
-            axum::extract::State(myuser.userinfoo.to_owned().into()),
-            title,
-            message,
-            myuser.servicee.to_owned(),
-            Some(action),
+            axum::extract::State(config.user.to_owned().into()),
+            title.to_owned(),
+            message.to_owned(),
+            config.service.to_owned(),
+            action,
         )
         .await;
     }

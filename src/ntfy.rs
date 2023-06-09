@@ -1,4 +1,4 @@
-use crate::{models::Config, userinfo::Userinfos};
+use crate::models::{Config, Userinfos};
 use axum::extract::State;
 use reqwest;
 use std::sync::Arc;

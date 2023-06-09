@@ -8,6 +8,7 @@ services:
         icon: "desktop_computer" #Optional
         topic: "server"
         priority: 3 #Optional
+        button: true
 
   - name: "gitea"
     auth:

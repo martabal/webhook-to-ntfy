@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::userinfo::Userinfos;
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Servicesconfig {
     pub services: Vec<Services>,
@@ -26,11 +24,12 @@ pub struct Config {
     pub topic: String,
     pub message: Option<String>,
     pub title: Option<String>,
+    pub button: Option<bool>,
 }
 
 pub struct New {
-    pub servicee: Config,
-    pub userinfoo: Userinfos,
+    pub service: Config,
+    pub user: Userinfos,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -39,4 +38,11 @@ pub struct Action {
     pub label: String,
     pub url: String,
     pub clear: bool,
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct Userinfos {
+    pub ntfybaseurl: String,
+    pub username: String,
+    pub password: String,
 }
