@@ -146,3 +146,17 @@ fn maskpassword(t: &str) -> String {
     }
     mask
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_maskpassword() {
+        let password = "secretpassword";
+        let result = maskpassword(password);
+        let supposed = "*".repeat(password.len());
+        assert_eq!(supposed, result);
+    }
+}
