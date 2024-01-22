@@ -4,8 +4,8 @@ use axum::{
 };
 use dotenv::dotenv;
 use serde_json::{json, Value};
-use serde_yaml;
-use services::{gitea, grafana, overseerr};
+
+use services::{gitea_webhooks, grafana_webhooks, overseer_webhooks};
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
 use webhookntfy::models::{New, Servicesconfig, Userinfos};
@@ -20,10 +20,10 @@ async fn main() {
 
     let mut routes: Router = Router::new().route("/healthcheck", get(healthcheck));
 
-    for service in scrape_config.services.iter() {
+    for service in &scrape_config.services {
         if service.name.to_lowercase() == "gitea" {
             println!("Gitea activated");
-            routes = routes.route("/gitea", post(gitea::gitea::mygitea));
+            routes = routes.route("/gitea", post(gitea_webhooks::gitea::mygitea));
 
             if let Some(test) = service.auth.clone() {
                 println!("Authentication activated for Grafana");
@@ -34,13 +34,13 @@ async fn main() {
             }
 
             routes = routes.layer(Extension(Arc::new(New {
-                service: service.config.to_owned(),
-                user: myinit.to_owned(),
+                service: service.config.clone(),
+                user: myinit.clone(),
             })));
         }
         if service.name.to_lowercase() == "grafana" {
             println!("Grafana activated");
-            routes = routes.route("/grafana", post(grafana::grafana::mygrafana));
+            routes = routes.route("/grafana", post(grafana_webhooks::grafana::mygrafana));
 
             if let Some(test) = service.auth.clone() {
                 println!("Authentication activated for Grafana");
@@ -51,13 +51,16 @@ async fn main() {
             }
 
             routes = routes.layer(Extension(Arc::new(New {
-                service: service.config.to_owned(),
-                user: myinit.to_owned(),
+                service: service.config.clone(),
+                user: myinit.clone(),
             })));
         }
         if service.name.to_lowercase() == "overseerr" {
             println!("Overseerr activated");
-            routes = routes.route("/overseerr", post(overseerr::overseerr::myoverseerr));
+            routes = routes.route(
+                "/overseerr",
+                post(overseer_webhooks::overseerr::myoverseerr),
+            );
 
             if let Some(test) = service.auth.clone() {
                 println!("Authentication activated for Overseerr");
@@ -68,8 +71,8 @@ async fn main() {
             }
 
             routes = routes.layer(Extension(Arc::new(New {
-                service: service.config.to_owned(),
-                user: myinit.to_owned(),
+                service: service.config.clone(),
+                user: myinit.clone(),
             })));
         }
     }
@@ -80,10 +83,14 @@ async fn main() {
         .unwrap_or(3000);
     let address = SocketAddr::from(([0, 0, 0, 0], port));
 
-    axum::Server::bind(&address)
-        .serve(routes.into_make_service())
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind(address).await.unwrap();
+
+    axum::serve(
+        listener,
+        routes.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+    .unwrap();
 }
 
 async fn healthcheck() -> axum::extract::Json<Value> {
@@ -97,10 +104,10 @@ fn inityml() -> Servicesconfig {
         "/config/config.yaml"
     };
 
-    let content = std::fs::read_to_string(path)
-        .unwrap_or_else(|err| panic!("Failed to read {}: {}", path, err));
+    let content =
+        std::fs::read_to_string(path).unwrap_or_else(|err| panic!("Failed to read {path}: {err}"));
 
-    serde_yaml::from_str(&content).unwrap_or_else(|err| panic!("Failed to parse {}: {}", path, err))
+    serde_yaml::from_str(&content).unwrap_or_else(|err| panic!("Failed to parse {path}: {err}"))
 }
 
 fn init() -> webhookntfy::models::Userinfos {
@@ -120,8 +127,9 @@ fn init() -> webhookntfy::models::Userinfos {
         password: env::var("NTFY_PASSWORD")
             .unwrap_or_else(|_| panic!("NTFY_PASSWORD must be set.")),
     };
-
+    #[allow(clippy::items_after_statements)]
     const VERSION: &str = env!("CARGO_PKG_VERSION");
+    #[allow(clippy::items_after_statements)]
     const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
     println!(
         "Author: {}\n\
@@ -136,7 +144,7 @@ fn init() -> webhookntfy::models::Userinfos {
         user.username,
         maskpassword(&user.password)
     );
-    return user;
+    user
 }
 
 fn maskpassword(t: &str) -> String {
