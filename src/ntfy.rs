@@ -21,32 +21,22 @@ pub async fn ntfy(
         .header("Priority", mypriority)
         .body(message);
 
-    match &myconfig.icon {
-        Some(x) => {
-            resp = resp.header("Tags", x);
-        }
-        None => {}
+    if let Some(x) = &myconfig.icon {
+        resp = resp.header("Tags", x);
     }
-    match action {
-        Some(x) => resp = resp.header("Actions", x),
-        None => {}
+
+    if let Some(x) = action {
+        resp = resp.header("Actions", x);
     }
 
     match resp.send().await {
         Ok(_) => {
-            println!("Notifications sent to {}", &url)
+            println!("Notifications sent to {}", &url);
         }
         Err(_) => println!("{} is not accessible !", &url),
     }
 }
 
 fn getpriority(priority: Option<i32>) -> String {
-    match priority {
-        Some(x) => {
-            return x.to_string();
-        }
-        None => {
-            return "3".to_owned(); // Default value
-        }
-    }
+    priority.map_or_else(|| "3".to_owned(), |x| x.to_string())
 }

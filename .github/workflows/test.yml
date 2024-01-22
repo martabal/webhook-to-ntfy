@@ -2,18 +2,23 @@ name: Test
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 jobs:
-
   test:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Run tests
         run: cargo test
+
       - name: Run formatter
         run: cargo fmt -- --check
+
+      - name: Run clippy
+        run: cargo clippy
+        if: ${{ !cancelled() }}

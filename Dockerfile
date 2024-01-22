@@ -1,13 +1,12 @@
-FROM rust:1.70-alpine3.18 as builder
+FROM rust:buster as builder
 
-COPY src Cargo.toml Cargo.lock /app/
+WORKDIR /app
 
-RUN apk add \
-    openssl-dev \
-    musl-dev && \
-    cargo build --release
+COPY . .
 
-FROM alpine:3.18
+RUN cargo build --release
+
+FROM debian:buster-slim
 
 WORKDIR /app
 

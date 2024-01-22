@@ -1,10 +1,10 @@
-use axum::{extract::State, http::Request, middleware::Next, response::Response};
+use axum::{extract::Request, extract::State, middleware::Next, response::Response};
 use base64::{engine::general_purpose, Engine};
 use serde_json::{json, Value};
 
 use crate::models::User;
 
-fn token_is_valid(request: String, user: String) -> Result<(), ()> {
+fn token_is_valid(request: &str, user: String) -> Result<(), ()> {
     let encoded: String = general_purpose::STANDARD.encode(user);
     if encoded == request {
         Ok(())
@@ -13,10 +13,12 @@ fn token_is_valid(request: String, user: String) -> Result<(), ()> {
     }
 }
 
-pub async fn auth<B>(
+#[allow(clippy::missing_errors_doc)]
+#[allow(clippy::missing_panics_doc)]
+pub async fn auth(
     State(myuser): State<User>,
-    req: Request<B>,
-    next: Next<B>,
+    req: Request,
+    next: Next,
 ) -> Result<Response, (axum::http::StatusCode, axum::extract::Json<Value>)> {
     let authheader = req
         .headers()
@@ -25,23 +27,18 @@ pub async fn auth<B>(
 
     match authheader {
         Some(myheader) => match token_is_valid(
-            myheader.strip_prefix("Basic ").unwrap().to_string(),
+            myheader.strip_prefix("Basic ").unwrap(),
             format!("{}:{}", myuser.username, myuser.password),
         ) {
-            Ok(_) => Ok(next.run(req).await),
-            Err(_) => {
-                return Err((
-                    axum::http::StatusCode::UNAUTHORIZED,
-                    json!({"error_message":"Wrong authentication","success":false}).into(),
-                ))
-            }
+            Ok(()) => Ok(next.run(req).await),
+            Err(()) => Err((
+                axum::http::StatusCode::UNAUTHORIZED,
+                json!({"error_message":"Wrong authentication","success":false}).into(),
+            )),
         },
-        _ => {
-            return Err((
-                axum::http::StatusCode::BAD_REQUEST,
-                json!({"error_message":"Your authentication header is missing","success":false})
-                    .into(),
-            ))
-        }
+        _ => Err((
+            axum::http::StatusCode::BAD_REQUEST,
+            json!({"error_message":"Your authentication header is missing","success":false}).into(),
+        )),
     }
 }

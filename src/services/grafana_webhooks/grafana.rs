@@ -1,20 +1,20 @@
 use super::models::GrafanaWebhook;
-use axum::{response::IntoResponse, Extension, Json};
-use reqwest::StatusCode;
+use axum::{http::StatusCode, Extension, Json};
+
 use std::sync::Arc;
 use webhookntfy::models::New;
 
 pub async fn mygrafana(
     Extension(config): Extension<Arc<New>>,
     Json(payload): Json<GrafanaWebhook>,
-) -> impl IntoResponse {
-    println!("test");
+) -> StatusCode {
     for i in payload.alerts {
-        let title: String = config
+        let title = config
             .service
             .title
-            .to_owned()
-            .unwrap_or(i.labels.alertname);
+            .clone()
+            .unwrap_or_else(|| i.labels.alertname.clone());
+
         let message = config.service.message.clone().unwrap_or_else(|| {
             i.annotations
                 .summary
@@ -39,10 +39,10 @@ pub async fn mygrafana(
         };
 
         webhookntfy::ntfy::ntfy(
-            axum::extract::State(config.user.to_owned().into()),
-            title.to_owned(),
-            message.to_owned(),
-            config.service.to_owned(),
+            axum::extract::State(config.user.clone().into()),
+            title.clone(),
+            message.clone(),
+            config.service.clone(),
             action,
         )
         .await;
