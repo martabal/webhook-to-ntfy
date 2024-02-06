@@ -9,6 +9,7 @@ use services::{gitea_webhooks, grafana_webhooks, overseer_webhooks};
 use std::sync::Arc;
 use std::{env, net::SocketAddr};
 use webhookntfy::models::{New, Servicesconfig, Userinfos};
+use axum::body::Body;
 
 mod services;
 
@@ -19,14 +20,18 @@ async fn main() {
     let scrape_config: Servicesconfig = inityml();
 
     let mut routes: Router = Router::new().route("/healthcheck", get(healthcheck));
+    println!("health check: activated");
+
+    routes = routes.route("/", get(app_status));
+    println!("app status: activated");
 
     for service in &scrape_config.services {
         if service.name.to_lowercase() == "gitea" {
-            println!("Gitea activated");
+            println!("Gitea: activated");
             routes = routes.route("/gitea", post(gitea_webhooks::gitea::mygitea));
 
             if let Some(test) = service.auth.clone() {
-                println!("Authentication activated for Grafana");
+                println!("Authentication enabled for Grafana");
                 routes = routes.layer(axum::middleware::from_fn_with_state(
                     test,
                     webhookntfy::auth::auth,
@@ -39,11 +44,11 @@ async fn main() {
             })));
         }
         if service.name.to_lowercase() == "grafana" {
-            println!("Grafana activated");
+            println!("Grafana: activated");
             routes = routes.route("/grafana", post(grafana_webhooks::grafana::mygrafana));
 
             if let Some(test) = service.auth.clone() {
-                println!("Authentication activated for Grafana");
+                println!("Authentication enabled for Grafana");
                 routes = routes.layer(axum::middleware::from_fn_with_state(
                     test,
                     webhookntfy::auth::auth,
@@ -56,14 +61,14 @@ async fn main() {
             })));
         }
         if service.name.to_lowercase() == "overseerr" {
-            println!("Overseerr activated");
+            println!("Overseerr: activated");
             routes = routes.route(
                 "/overseerr",
                 post(overseer_webhooks::overseerr::myoverseerr),
             );
 
             if let Some(test) = service.auth.clone() {
-                println!("Authentication activated for Overseerr");
+                println!("Authentication enabled for Overseerr");
                 routes = routes.layer(axum::middleware::from_fn_with_state(
                     test,
                     webhookntfy::auth::auth,
@@ -85,6 +90,8 @@ async fn main() {
 
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
 
+    println!("Listening on: http://{}", listener.local_addr().unwrap());
+
     axum::serve(
         listener,
         routes.into_make_service_with_connect_info::<SocketAddr>(),
@@ -95,6 +102,10 @@ async fn main() {
 
 async fn healthcheck() -> axum::extract::Json<Value> {
     json!({"status": 200}).into()
+}
+
+async fn app_status() -> axum::response::Response<Body> {
+    axum::response::Response::new(Body::from("App is healthy"))
 }
 
 fn inityml() -> Servicesconfig {
@@ -137,7 +148,7 @@ fn init() -> webhookntfy::models::Userinfos {
         Ntfy base URL: {}\n\
         Username: {}\n\
         Password: {}\n\
-        Started",
+        Starting up...",
         AUTHOR,
         VERSION,
         user.ntfybaseurl,
