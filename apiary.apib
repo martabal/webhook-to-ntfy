@@ -1,0 +1,91 @@
+FORMAT: 1A
+HOST: https://webhooks.com/
+
+# Webhook to ntfy
+
+[![Publish Release](https://github.com/martabal/webhook-to-ntfy/actions/workflows/push_docker.yml/badge.svg)](https://github.com/martabal/webhook-to-ntfy/actions/workflows/push_docker.yml)
+[![Build](https://github.com/martabal/webhook-to-ntfy/actions/workflows/build.yml/badge.svg)](https://github.com/martabal/webhook-to-ntfy/actions/workflows/build.yml)
+[![Test](https://github.com/martabal/webhook-to-ntfy/actions/workflows/test.yml/badge.svg)](https://github.com/martabal/webhook-to-ntfy/actions/workflows/test.yml)
+
+## What is it
+
+Use Webhook to ntfy to services that don't support [ntfy](https://github.com/binwiederhier/ntfy), but support webhook notifications.
+
+Services available :
+
+- gitea
+- grafana
+- [Overseerr](https://overseerr.dev/)
+
+## Endpoints Collection [/healthcheck]
+
+### Health Check [GET]
+
++ Response 200 (application/json)
+
+        {
+            "status": 200
+        }
+        
+### Test Overseerr Notification [POST]
+
+Some description .
+
++ Request ( application/json )
+
+    + Body
+
+            {
+                "notification_type": "overseerr",
+                "subject": "test",
+                "message": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                "image": "",
+                "email": "",
+                "username": "",
+                "avatar": ""
+            }
+            
+    + Schema
+
+            {
+              "type": "object",
+              "properties": {
+                    "notification_type": {
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "image": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "avatar": {
+                      "type": "string"
+                    },
+                }
+            }
+  
+    + Headers
+
+            Authorization: Basic YXBpQGN5YmVyc2hvbHQuY29tOmRlbmllZDEyIyQ=
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /overseerr
+
+    + Body
+
+            {
+                
+            }
